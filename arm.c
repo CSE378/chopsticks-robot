@@ -5,7 +5,7 @@
 //--------------------------------------------------Variables
 
 // Bluetooth Messages
-string BODY_START = "BODY_START";
+const string BODY_START = "BODY_START";
 
 // RobotC doesn't hoist functions, solve
 // this by declaring functions above.
@@ -62,7 +62,9 @@ void pickUpSushi();
 // Drops the sushi.
 void dropSushi();
 // Exit the program
-void exit();
+void exit(){
+	powerOff();
+};
 
 //--------------------------------------------------Main
 // Runs a single cycle of the arm program.

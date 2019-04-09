@@ -6,8 +6,8 @@
 //--------------------------------------------------Variables
 
 // Bluetooth Messages
-string ARM_START = "ARM_START";
-string ARM_EXIT = "ARM_EXIT";
+const string ARM_START = "ARM_START";
+const string ARM_EXIT = "ARM_EXIT";
 
 // RobotC doesn't hoist functions, solve
 // this by declaring functions above.
@@ -39,15 +39,15 @@ bool seeSushi();
 // COMMAND    | CODE |  TRANSLATION
 // -----------|------|-----------------------
 // ARM_START  |  +1  |  Run arm cycle
-// EXIT_ARM   |  -1  |  Exit arm program
+// ARM_EXIT   |  -1  |  Exit arm program
 
 // Sends a message to the arm controller.
-void messageArm(string command) {
+void messageArm(const string command) {
 	switch(command) {
 		case ARM_START:
 			sendMessage(1);
 			break;
-		case EXIT_ARM:
+		case ARM_EXIT:
 			sendMessage(-1);
 			break;
 		default:
@@ -68,7 +68,12 @@ void init();
 void toNextSushi();
 // Exit the program
 // Send message code of -1 to arm to notify it to exit
-void exit();
+void exit(){
+	messageArm(ARM_EXIT);
+	// Wait 1 second to make sure arm receives message.
+	wait1Msec(1000);
+	powerOff();
+};
 
 //--------------------------------------------------Main
 // Runs a single cycle of the sushi program. We move forward
