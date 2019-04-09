@@ -5,6 +5,10 @@
 
 //--------------------------------------------------Variables
 
+// Bluetooth Messages
+string ARM_START = "ARM_START";
+string ARM_EXIT = "ARM_EXIT";
+
 // RobotC doesn't hoist functions, solve
 // this by declaring functions above.
 void moveWheels();
@@ -32,15 +36,23 @@ bool seeSushi();
 
 //--------------------------------------------------Bluetooth
 
-// CODE  |  TRANSLATION
-// ------|-----------------------
-// +2    |  Run body cycle
-// +1    |  Run arm cycle
-// -1    |  Exit arm program
+// COMMAND    | CODE |  TRANSLATION
+// -----------|------|-----------------------
+// ARM_START  |  +1  |  Run arm cycle
+// EXIT_ARM   |  -1  |  Exit arm program
 
 // Sends a message to the arm controller.
-void messageArm(int code) {
-	sendMessage(code);
+void messageArm(string command) {
+	switch(command) {
+		case ARM_START:
+			sendMessage(1);
+			break;
+		case EXIT_ARM:
+			sendMessage(-1);
+			break;
+		default:
+			break;
+	}
 };
 // Pauses the program while we wait for a
 // message from the arm controller.

@@ -4,6 +4,9 @@
 
 //--------------------------------------------------Variables
 
+// Bluetooth Messages
+string BODY_START = "BODY_START";
+
 // RobotC doesn't hoist functions, solve
 // this by declaring functions above.
 void toDefaultPosition();
@@ -30,15 +33,19 @@ void releaseChopsticks(int power);
 
 //--------------------------------------------------Bluetooth
 
-// CODE  |  TRANSLATION
-// ------|-----------------------
-// +2    |  Run body cycle
-// +1    |  Run arm cycle
-// -1    |  Exit arm program
+// COMMAND    | CODE |  TRANSLATION
+// -----------|------|-----------------------
+// BODY_START |  +2  |  Run body cycle
 
 // Sends a message to the body controller.
-void messageBody(int code) {
-	sendMessage(code);
+void messageBody(string command) {
+	switch(command) {
+		case BODY_START:
+			sendMessage(2);
+			break;
+		default:
+			break;
+	}
 };
 // Pauses the program while we wait for a
 // message from the body controller.
