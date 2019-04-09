@@ -15,11 +15,21 @@ void releaseChopsticks(int power);
 
 //--------------------------------------------------Bluetooth
 
+// CODE  |  TRANSLATION
+// ------|-----------------------
+// +2    |  Run body cycle
+// +1    |  Run arm cycle
+// -1    |  Exit arm program
+
 // Sends a message to the body controller.
-void messageBody();
+void messageBody(int code) {
+	sendMessage(code);
+};
 // Pauses the program while we wait for a
 // message from the body controller.
-void waitForMessage();
+void waitForMessage(){
+	waitUntil(message);
+};
 
 //--------------------------------------------------Utils
 

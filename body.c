@@ -32,11 +32,21 @@ bool seeSushi();
 
 //--------------------------------------------------Bluetooth
 
+// CODE  |  TRANSLATION
+// ------|-----------------------
+// +2    |  Run body cycle
+// +1    |  Run arm cycle
+// -1    |  Exit arm program
+
 // Sends a message to the arm controller.
-void messageArm();
+void messageArm(int code) {
+	sendMessage(code);
+};
 // Pauses the program while we wait for a
 // message from the arm controller.
-void waitForMessage();
+void waitForMessage() {
+	waitUntil(message);
+};
 
 //--------------------------------------------------Utils
 
@@ -45,6 +55,7 @@ void init();
 // Moves forward until we hit sushi
 void toNextSushi();
 // Exit the program
+// Send message code of -1 to arm to notify it to exit
 void exit();
 
 //--------------------------------------------------Main
