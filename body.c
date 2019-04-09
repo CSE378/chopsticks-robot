@@ -49,9 +49,13 @@ void exit();
 
 //--------------------------------------------------Main
 // Runs a single cycle of the sushi program. We move forward
-// until we hit sushi, and then send a message to the arm.
-// Afterwards, we wait for the message and restart the loop.
-// Exit the program if we don't see sushi for a set interval.
+//
+// 1) Move forward until robot sees sushi.
+//	 - If we don't see sushi after a certain period
+//     of time, exit the arm and body programs.
+// 2) Send a message to arm to pickup and drop sushi.
+// 3) Wait for message from arm
+// 4) Restart loop
 void nextCycle();
 
 task main()
