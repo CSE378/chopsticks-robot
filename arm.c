@@ -6,6 +6,7 @@
 
 // Bluetooth Messages
 const string BODY_START = "BODY_START";
+const string ARM_INIT = "ARM_INIT"
 const string ARM_START = "ARM_START";
 const string ARM_EXIT = "ARM_EXIT";
 
@@ -37,7 +38,8 @@ void releaseChopsticks(int power);
 
 // COMMAND    | CODE |  TRANSLATION
 // -----------|------|-----------------------
-// BODY_START |  +2  |  Run body cycle
+// BODY_START |  +3  |  Run body cycle
+// ARM_INIT   |  +2  |  Initialize arm
 // ARM_START  |  +1  |  Run arm cycle
 // ARM_EXIT   |  -1  |  Exit arm program
 
@@ -46,7 +48,7 @@ void messageBody(const string command) {
 	// RobotC bugs out if switch has one case,
   // just use if check for now.
 	if (strcmp(command, BODY_START) == 0) {
-		sendMessage(1);
+		sendMessage(3);
 	}
 };
 // Pauses the program while we wait for a
@@ -78,7 +80,7 @@ void exit(){
 // 4) Move to default position
 // 5) Message body
 // 6) Repeat loop
-void nextCycle();
+void nextArmCycle();
 
 task main()
 {

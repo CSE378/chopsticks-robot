@@ -5,8 +5,11 @@
 
 //--------------------------------------------------Variables
 
+const int speed = 10;
+
 // Bluetooth Messages
 const string BODY_START = "BODY_START";
+const string ARM_INIT = "ARM_INIT"
 const string ARM_START = "ARM_START";
 const string ARM_EXIT = "ARM_EXIT";
 
@@ -39,13 +42,17 @@ bool seeSushi();
 
 // COMMAND    | CODE |  TRANSLATION
 // -----------|------|-----------------------
-// BODY_START |  +2  |  Run body cycle
+// BODY_START |  +3  |  Run body cycle
+// ARM_INIT   |  +2  |  Initialize arm
 // ARM_START  |  +1  |  Run arm cycle
 // ARM_EXIT   |  -1  |  Exit arm program
 
 // Sends an ARM message to the arm controller.
 void messageArm(const string command) {
 	switch(command) {
+		case ARM_INIT:
+			sendMessage(2);
+			break;
 		case ARM_START:
 			sendMessage(1);
 			break;
@@ -67,7 +74,11 @@ void waitForMessage() {
 // Initialize system variables
 void init();
 // Moves forward until we hit sushi
-void toNextSushi();
+void toNextSushi(){
+	moveWheels(speed);
+	waitUntil(seeSushi() == true);
+	stopWheels();
+};
 // Exit the program
 // Send message code of -1 to arm to notify it to exit
 void exit(){
@@ -86,7 +97,14 @@ void exit(){
 // 2) Send a message to arm to pickup and drop sushi.
 // 3) Wait for message from arm
 // 4) Restart loop
-void nextCycle();
+void nextBodyCycle(){
+	toNextSushi();
+
+	messageArm(ARM_START);
+	waitForMessage();
+
+	nextBodyCycle();
+};
 
 task main()
 {
