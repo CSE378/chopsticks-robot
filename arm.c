@@ -6,6 +6,8 @@
 
 // Bluetooth Messages
 const string BODY_START = "BODY_START";
+const string ARM_START = "ARM_START";
+const string ARM_EXIT = "ARM_EXIT";
 
 // RobotC doesn't hoist functions, solve
 // this by declaring functions above.
@@ -36,15 +38,15 @@ void releaseChopsticks(int power);
 // COMMAND    | CODE |  TRANSLATION
 // -----------|------|-----------------------
 // BODY_START |  +2  |  Run body cycle
+// ARM_START  |  +1  |  Run arm cycle
+// ARM_EXIT   |  -1  |  Exit arm program
 
-// Sends a message to the body controller.
-void messageBody(string command) {
-	switch(command) {
-		case BODY_START:
-			sendMessage(2);
-			break;
-		default:
-			break;
+// Sends a BODY message to the body controller.
+void messageBody(const string command) {
+	// RobotC bugs out if switch has one case,
+  // just use if check for now.
+	if (strcmp(command, BODY_START) == 0) {
+		sendMessage(1);
 	}
 };
 // Pauses the program while we wait for a

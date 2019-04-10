@@ -6,6 +6,7 @@
 //--------------------------------------------------Variables
 
 // Bluetooth Messages
+const string BODY_START = "BODY_START";
 const string ARM_START = "ARM_START";
 const string ARM_EXIT = "ARM_EXIT";
 
@@ -38,10 +39,11 @@ bool seeSushi();
 
 // COMMAND    | CODE |  TRANSLATION
 // -----------|------|-----------------------
+// BODY_START |  +2  |  Run body cycle
 // ARM_START  |  +1  |  Run arm cycle
 // ARM_EXIT   |  -1  |  Exit arm program
 
-// Sends a message to the arm controller.
+// Sends an ARM message to the arm controller.
 void messageArm(const string command) {
 	switch(command) {
 		case ARM_START:
