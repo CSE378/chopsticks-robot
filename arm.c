@@ -57,6 +57,24 @@ void waitForMessage(){
 	waitUntil(message);
 };
 
+// Parses an ARM command coming from the
+// body controller
+void parseMessage() {
+	switch(message){
+		case 2:
+			toDefaultPosition();
+			break;
+		case 1:
+			nextArmCycle();
+			break;
+		case -1:
+			exit();
+			break;
+		default:
+			break;
+	}
+}
+
 //--------------------------------------------------Utils
 
 // Initialize system variables
