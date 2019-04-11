@@ -73,9 +73,17 @@ void messageArm(const string command) {
 };
 // Pauses the program while we wait for a
 // message from the arm controller.
-void waitForMessage() {
-	waitUntil(message);
+const string waitForMessage() {
+	waitUntil(message != 0);
 };
+
+// Parses a BODY command coming from the
+// arm controller
+void parseMessage() {
+	if (message == 3) {
+		nextBodyCycle();
+	}
+}
 
 //--------------------------------------------------Utils
 
@@ -104,14 +112,14 @@ void exit(){
 //     of time, exit the arm and body programs.
 // 2) Send a message to arm to pickup and drop sushi.
 // 3) Wait for message from arm
-// 4) Restart loop
+// 4) Decide next step depending on message
 void nextBodyCycle(){
 	toNextSushi();
 
 	messageArm(ARM_START);
 	waitForMessage();
 
-	nextBodyCycle();
+	parseMessage();
 };
 
 task main()
