@@ -28,15 +28,23 @@ void runSushiRobot();
 //--------------------------------------------------Movement
 
 // Moves the robot forward.
-void moveWheels(int power);
+void moveWheels(int power) {
+	motor[leftWheel] = power;
+	motor[rightWheel] = power;
+};
 // Stops the robot.
-void stopWheels();
+void stopWheels() {
+	motor[leftWheel] = 0;
+	motor[rightWheel] = 0;
+};
 
 //--------------------------------------------------Vision
 
 // Returns true if the light sensor detects
 // sushi, and false otherwise.
-bool seeSushi();
+bool seeSushi() {
+
+};
 
 //--------------------------------------------------Bluetooth
 
