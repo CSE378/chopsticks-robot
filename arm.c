@@ -31,6 +31,7 @@ void init();
 void pickUpSushi();
 void dropSushi();
 void exit();
+void nextArmCycle();
 
 //--------------------------------------------------Movement
 
@@ -99,15 +100,15 @@ void waitForMessage(){
 void parseMessage() {
 	switch(message){
 		case 2:
-			clearMessage();
+			ClearMessage();
 			toDefaultPosition();
 			break;
 		case 1:
-			clearMessage();
+			ClearMessage();
 			nextArmCycle();
 			break;
 		case -1:
-			clearMessage();
+			ClearMessage();
 			exit();
 			break;
 		default:
