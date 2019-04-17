@@ -63,12 +63,15 @@ void waitForMessage(){
 void parseMessage() {
 	switch(message){
 		case 2:
+			clearMessage();
 			toDefaultPosition();
 			break;
 		case 1:
+			clearMessage();
 			nextArmCycle();
 			break;
 		case -1:
+			clearMessage();
 			exit();
 			break;
 		default:
@@ -81,9 +84,15 @@ void parseMessage() {
 // Initialize system variables
 void init();
 // Pick up the sushi.
-void pickUpSushi();
+void pickUpSushi() {
+	toSushiPosition();
+	pinchChopsticks();
+};
 // Drops the sushi.
-void dropSushi();
+void dropSushi() {
+
+	toDefaultPosition();
+};
 // Exit the program
 void exit(){
 	powerOff();
@@ -102,7 +111,7 @@ void exit(){
 void nextArmCycle() {
 	pickUpSushi();
 	dropSushi();
-	toDefaultPosition();
+
 	parseMessage();
 };
 

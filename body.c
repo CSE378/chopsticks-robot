@@ -84,6 +84,7 @@ void waitForMessage() {
 // arm controller
 void parseMessage() {
 	if (message == 3) {
+		clearMessage();
 		nextBodyCycle();
 	}
 }
