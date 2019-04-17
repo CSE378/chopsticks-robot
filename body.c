@@ -13,6 +13,9 @@ const string ARM_INIT = "ARM_INIT"
 const string ARM_START = "ARM_START";
 const string ARM_EXIT = "ARM_EXIT";
 
+// Movement Variables
+const int SEARCH_TIME = 3000; // Stop searching for sushi after this much time
+
 // RobotC doesn't hoist functions, solve
 // this by declaring functions above.
 void moveWheels();
@@ -96,7 +99,14 @@ void init() {
 // Moves forward until we hit sushi
 void toNextSushi(){
 	moveWheels(speed);
-	waitUntil(seeSushi() == true);
+
+	// Keep going until we see sushi.
+	// If certain time elapses, exit program.
+	ClearTimer(T1);
+	while(seeSushi() != true) {
+		if (time1[T1] >= SEARCH_TIME) exit();
+	}
+
 	stopWheels();
 };
 // Exit the program
