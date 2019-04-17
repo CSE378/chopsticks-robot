@@ -24,6 +24,7 @@ void init();
 void toNextSushi();
 void exit();
 void runSushiRobot();
+void nextBodyCycle();
 
 //--------------------------------------------------Movement
 
@@ -73,7 +74,7 @@ void messageArm(const string command) {
 };
 // Pauses the program while we wait for a
 // message from the arm controller.
-const string waitForMessage() {
+void waitForMessage() {
 	waitUntil(message != 0);
 };
 
@@ -88,7 +89,10 @@ void parseMessage() {
 //--------------------------------------------------Utils
 
 // Initialize system variables
-void init();
+void init() {
+	messageArm(ARM_INIT);
+	stopWheels();
+};
 // Moves forward until we hit sushi
 void toNextSushi(){
 	moveWheels(speed);
@@ -105,7 +109,7 @@ void exit(){
 };
 
 //--------------------------------------------------Main
-// Runs a single cycle of the sushi program. We move forward
+// Runs a single cycle of the sushi program.
 //
 // 1) Move forward until robot sees sushi.
 //	 - If we don't see sushi after a certain period
@@ -124,5 +128,6 @@ void nextBodyCycle(){
 
 task main()
 {
-
+	init();
+	nextBodyCycle();
 }
