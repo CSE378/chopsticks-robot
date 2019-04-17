@@ -11,6 +11,14 @@ const string ARM_INIT = "ARM_INIT"
 const string ARM_START = "ARM_START";
 const string ARM_EXIT = "ARM_EXIT";
 
+// Movement variables
+int turnPower = 10;
+int turnTime = 1000;
+int jointPower = 10;
+int jointTime = 1000;
+int pinchPower = 10;
+int pinchTime = 500;
+
 // RobotC doesn't hoist functions, solve
 // this by declaring functions above.
 void toDefaultPosition();
@@ -26,14 +34,42 @@ void exit();
 
 //--------------------------------------------------Movement
 
-// Moves arm configuration into default position.
-void toDefaultPosition();
 // Moves the arm into place.
-void toSushiPosition();
+void toSushiPosition(){
+	// Turn to sushi
+	motor[turnMotor] = turnPower;
+	wait1Msec(turnTime);
+	motor[turnMotor] = 0;
+
+	// Joint down to sushi
+	motor[jointMotor] = jointPower;
+	wait1Msec(jointTime);
+	motor[jointMotor] = 0;
+};
+// Moves arm configuration into default position.
+void toDefaultPosition(){
+	// Joint back up
+	motor[jointMotor] = -jointPower;
+	wait1Msec(jointTime);
+	motor[jointMotor] = 0;
+
+	// Turn back
+	motor[turnMotor] = -turnPower;
+	wait1Msec(turnTime);
+	motor[turnMotor] = 0;
+};
 // Moves chopsticks into pinching position.
-void pinchChopsticks();
+void pinchChopsticks(){
+	motor[pinchMotor] = pinchPower;
+	wait1Msec(pinchTime);
+	motor[pinchMotor] = 0;
+};
 // Releases chopsticks from pinching position.
-void releaseChopsticks();
+void releaseChopsticks(){
+	motor[pinchMotor] = -pinchPower;
+	wait1Msec(pinchTime);
+	motor[pinchMotor] = 0;
+};
 
 //--------------------------------------------------Bluetooth
 
