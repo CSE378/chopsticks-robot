@@ -15,14 +15,14 @@ const string ARM_EXIT = "ARM_EXIT";
 int turnPower = 10;
 int turnTime = 1000;
 int jointPower = 10;
-int jointTime = 1000;
+int jointTime = 500;
 int pinchPower = 10;
 int pinchTime = 500;
 
 // RobotC doesn't hoist functions, solve
 // this by declaring functions above.
 void toDefaultPosition();
-void moveArm();
+void toSushiPosition();
 void pinchChopsticks();
 void releaseChopsticks();
 void messageBody();
@@ -47,8 +47,7 @@ void toSushiPosition(){
 	wait1Msec(jointTime);
 	motor[jointMotor] = 0;
 };
-// Moves arm configuration into default position.
-void toDefaultPosition(){
+void toDropPosition(){
 	// Joint back up
 	motor[jointMotor] = -jointPower;
 	wait1Msec(jointTime);
@@ -56,6 +55,13 @@ void toDefaultPosition(){
 
 	// Turn back
 	motor[turnMotor] = -turnPower;
+	wait1Msec(2*turnTime);
+	motor[turnMotor] = 0;
+}
+// Moves arm configuration into default position after dropping.
+void toDefaultPosition(){
+	// Turn back
+	motor[turnMotor] = turnPower;
 	wait1Msec(turnTime);
 	motor[turnMotor] = 0;
 };
@@ -127,7 +133,8 @@ void pickUpSushi() {
 };
 // Drops the sushi.
 void dropSushi() {
-
+	toDropPosition();
+	releaseChopsticks();
 	toDefaultPosition();
 };
 // Exit the program
@@ -149,12 +156,14 @@ void nextArmCycle() {
 	pickUpSushi();
 	dropSushi();
 
+	messageBody(BODY_START);
+
+	waitForMessage();
 	parseMessage();
 };
 
 task main()
 {
-
-
-
+	waitForMessage();
+	parseMessage();
 }
