@@ -99,7 +99,12 @@ void exit(){
 // 4) Move to default position
 // 5) Message body
 // 6) Repeat loop
-void nextArmCycle();
+void nextArmCycle() {
+	pickUpSushi();
+	dropSushi();
+	toDefaultPosition();
+	parseMessage();
+};
 
 task main()
 {

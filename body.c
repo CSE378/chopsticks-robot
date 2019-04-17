@@ -5,8 +5,6 @@
 
 //--------------------------------------------------Variables
 
-const int speed = 10;
-
 // Bluetooth Messages
 const string BODY_START = "BODY_START";
 const string ARM_INIT = "ARM_INIT"
@@ -15,6 +13,7 @@ const string ARM_EXIT = "ARM_EXIT";
 
 // Movement Variables
 const int SEARCH_TIME = 3000; // Stop searching for sushi after this much time
+const int speed = 10;
 
 // RobotC doesn't hoist functions, solve
 // this by declaring functions above.
