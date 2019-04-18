@@ -19,6 +19,7 @@ const int seeBufferTime = 500 // Buffer time after seeing object to center itsel
 // Sushi Sensor Threshold
 const int sushiValue = 10;
 const int errorMargin = 5;
+int jointRatio = 1;
 
 // RobotC doesn't hoist functions, solve
 // this by declaring functions above.
@@ -54,6 +55,15 @@ bool seeSushi() {
 	return abs(SensorValue[sonarSensor] - sushiValue) <= errorMargin;
 };
 
+void updateJointRatio() {
+	// Wait to stabilize value
+	wait1Msec(500);
+	// Test this adaptive code later
+	jointRatio = sushiValue / SensorValue[sonarSensor]
+	// For now, just make it 1
+	jointRatio = 1;
+}
+
 //--------------------------------------------------Bluetooth
 
 // COMMAND    | CODE |  TRANSLATION
@@ -70,7 +80,7 @@ void messageArm(const string command) {
 			sendMessage(2);
 			break;
 		case ARM_START:
-			sendMessage(1);
+			sendMessageWithParm(1, jointRatio);
 			break;
 		case ARM_EXIT:
 			sendMessage(-1);
@@ -112,6 +122,7 @@ void toNextSushi(){
 		if (time1[T1] >= SEARCH_TIME) exit();
 	}
 	wait1Msec(seeBufferTime);
+	updateJointRatio();
 
 	stopWheels();
 };

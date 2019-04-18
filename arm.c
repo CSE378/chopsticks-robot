@@ -14,6 +14,7 @@ const string ARM_EXIT = "ARM_EXIT";
 // Movement variables
 int turnPower = 10;
 int turnTime = 1000;
+int jointRatio = 1; // Account for difference in distances to robot
 int jointPower = 10;
 int jointTime = 500;
 int pinchPower = 10;
@@ -52,13 +53,13 @@ void toSushiPosition(){
 
 	// Joint down to sushi
 	motor[jointMotor] = jointPower;
-	wait1Msec(jointTime);
+	wait1Msec(jointTime * jointRatio);
 	motor[jointMotor] = 0;
 };
 void toDropPosition(){
 	// Joint back up
 	motor[jointMotor] = -jointPower;
-	wait1Msec(jointTime);
+	wait1Msec(jointTime * jointRatio);
 	motor[jointMotor] = 0;
 
 	// Turn back
@@ -114,6 +115,7 @@ void parseMessage() {
 			toDefaultPosition();
 			break;
 		case 1:
+			jointRatio = messageParm[1];
 			ClearMessage();
 			nextArmCycle();
 			break;
