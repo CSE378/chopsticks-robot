@@ -34,13 +34,21 @@ void exit();
 void nextArmCycle();
 
 //--------------------------------------------------Movement
+void turnArm(int power, int degrees){
+	nMotorEncoder[turnMotor] = 0;
+	nMotorEncoderTarget[turnMotor] = degrees;
+	motor[turnMotor] = power;
+
+	while(nMotorRunState[turnMotor] != runStateIdle)
+ { /* This is an idle loop. The program waits until the condition is satisfied*/}
+
+ motor[turnMotor] = 0;
+}
 
 // Moves the arm into place.
 void toSushiPosition(){
 	// Turn to sushi
-	motor[turnMotor] = turnPower;
-	wait1Msec(turnTime);
-	motor[turnMotor] = 0;
+	turnArm(turnPower, 90);
 
 	// Joint down to sushi
 	motor[jointMotor] = jointPower;
@@ -54,16 +62,12 @@ void toDropPosition(){
 	motor[jointMotor] = 0;
 
 	// Turn back
-	motor[turnMotor] = -turnPower;
-	wait1Msec(2*turnTime);
-	motor[turnMotor] = 0;
+	turnArm(-turnPower, 180);
 }
 // Moves arm configuration into default position after dropping.
 void toDefaultPosition(){
 	// Turn back
-	motor[turnMotor] = turnPower;
-	wait1Msec(turnTime);
-	motor[turnMotor] = 0;
+	turnArm(turnPower, 90);
 };
 // Moves chopsticks into pinching position.
 void pinchChopsticks(){
@@ -98,7 +102,7 @@ void messageBody(const string command) {
 // Pauses the program while we wait for a
 // message from the body controller.
 void waitForMessage(){
-	waitUntil(message);
+	waitUntil(message != 0);
 };
 
 // Parses an ARM command coming from the

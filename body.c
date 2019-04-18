@@ -14,6 +14,7 @@ const string ARM_EXIT = "ARM_EXIT";
 // Movement Variables
 const int SEARCH_TIME = 3000; // Stop searching for sushi after this much time
 const int speed = -10;	// Make negative since it will otherwise go backwards
+const int seeBufferTime = 500 // Buffer time after seeing object to center itself
 
 // Sushi Sensor Threshold
 const int sushiValue = 10;
@@ -108,8 +109,9 @@ void toNextSushi(){
 	// If certain time elapses, exit program.
 	ClearTimer(T1);
 	while(seeSushi() != true) {
-		//if (time1[T1] >= SEARCH_TIME) exit();
+		if (time1[T1] >= SEARCH_TIME) exit();
 	}
+	wait1Msec(seeBufferTime);
 
 	stopWheels();
 };
@@ -134,7 +136,7 @@ void exit(){
 void nextBodyCycle(){
 	toNextSushi();
 
-	//messageArm(ARM_START);
+	messageArm(ARM_START);
 	waitForMessage();
 
 	parseMessage();
