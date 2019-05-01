@@ -1,3 +1,4 @@
+#pragma config(Sensor, S1,     touchSensor,    sensorTouch)
 #pragma config(Motor,  motorA,          turnMotor,     tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  motorB,          jointMotor,    tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  motorC,          pinchMotor,    tmotorNXT, PIDControl, encoder)
@@ -12,13 +13,13 @@ const string ARM_START = "ARM_START";
 const string ARM_EXIT = "ARM_EXIT";
 
 // Movement variables
-int turnPower = 10;
-int turnTime = 1000;
+int turnPower = 50;
+int turnTime = 2500;
 int jointRatio = 1; // Account for difference in distances to robot
-int jointPower = 10;
-int jointTime = 500;
-int pinchPower = 10;
-int pinchTime = 500;
+int jointPower = -30;
+int jointTime = 1200;
+int pinchPower = 20;
+int pinchTime = 250;
 
 // RobotC doesn't hoist functions, solve
 // this by declaring functions above.
@@ -35,21 +36,16 @@ void exit();
 void nextArmCycle();
 
 //--------------------------------------------------Movement
-void turnArm(int power, int degrees){
-	nMotorEncoder[turnMotor] = 0;
-	nMotorEncoderTarget[turnMotor] = degrees;
+void turnArm(int power, int time){
 	motor[turnMotor] = power;
-
-	while(nMotorRunState[turnMotor] != runStateIdle)
- { /* This is an idle loop. The program waits until the condition is satisfied*/}
-
- motor[turnMotor] = 0;
+	wait1Msec(time);
+	motor[turnMotor] = 0;
 }
 
 // Moves the arm into place.
 void toSushiPosition(){
 	// Turn to sushi
-	turnArm(turnPower, 90);
+	//turnArm(turnPower, 90);
 
 	// Joint down to sushi
 	motor[jointMotor] = jointPower;
@@ -63,12 +59,12 @@ void toDropPosition(){
 	motor[jointMotor] = 0;
 
 	// Turn back
-	turnArm(-turnPower, 180);
+	turnArm(-turnPower, turnTime);
 }
 // Moves arm configuration into default position after dropping.
 void toDefaultPosition(){
 	// Turn back
-	turnArm(turnPower, 90);
+	turnArm(turnPower, turnTime);
 };
 // Moves chopsticks into pinching position.
 void pinchChopsticks(){
@@ -103,7 +99,12 @@ void messageBody(const string command) {
 // Pauses the program while we wait for a
 // message from the body controller.
 void waitForMessage(){
-	waitUntil(message != 0);
+	while(cCmdMessageGetSize(mailbox1) <= 0) {
+		nxtDisplayTextLine(0, "NO MESSAGE", message);
+		wait1Msec(100);
+	}
+	//waitUntil(SensorValue[touchSensor] > 0.7);
+	//nextArmCycle();
 };
 
 // Parses an ARM command coming from the
@@ -124,7 +125,7 @@ void parseMessage() {
 			exit();
 			break;
 		default:
-			break;
+			nextArmCycle();
 	}
 }
 
@@ -140,13 +141,26 @@ void pickUpSushi() {
 // Drops the sushi.
 void dropSushi() {
 	toDropPosition();
+
+	// Move arm down
+	motor[jointMotor] = jointPower;
+	wait1Msec(600);
+	motor[jointMotor] = 0;
+
 	releaseChopsticks();
+
+	// Move arm up
+	motor[jointMotor] = -jointPower;
+	wait1Msec(650);
+	motor[jointMotor] = 0;
+
 	toDefaultPosition();
 };
 // Exit the program
 void exit(){
 	powerOff();
 };
+
 
 //--------------------------------------------------Main
 // Runs a single cycle of the arm program.
@@ -165,11 +179,12 @@ void nextArmCycle() {
 	messageBody(BODY_START);
 
 	waitForMessage();
-	parseMessage();
 };
 
 task main()
 {
+	setBluetoothOn();
 	waitForMessage();
+	//waitForMessage();
 	parseMessage();
 }

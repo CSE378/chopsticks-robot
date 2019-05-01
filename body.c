@@ -1,3 +1,4 @@
+#pragma config(Sensor, S1,     touchSensor,    sensorTouch)
 #pragma config(Sensor, S4,     sonarSensor,    sensorSONAR)
 #pragma config(Motor,  motorA,          leftWheel,     tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  motorB,          rightWheel,    tmotorNXT, PIDControl, encoder)
@@ -12,9 +13,9 @@ const string ARM_START = "ARM_START";
 const string ARM_EXIT = "ARM_EXIT";
 
 // Movement Variables
-const int SEARCH_TIME = 3000; // Stop searching for sushi after this much time
+const int SEARCH_TIME = 5000; // Stop searching for sushi after this much time
 const int speed = -10;	// Make negative since it will otherwise go backwards
-const int seeBufferTime = 500 // Buffer time after seeing object to center itself
+const int seeBufferTime = 2000 // Buffer time after seeing object to center itself
 
 // Sushi Sensor Threshold
 const int sushiValue = 10;
@@ -75,24 +76,30 @@ void updateJointRatio() {
 
 // Sends an ARM message to the arm controller.
 void messageArm(const string command) {
-	switch(command) {
-		case ARM_INIT:
-			sendMessage(2);
-			break;
-		case ARM_START:
-			sendMessageWithParm(1, jointRatio);
-			break;
-		case ARM_EXIT:
-			sendMessage(-1);
-			break;
-		default:
-			break;
+	if (strcmp(command, ARM_START) == 0) {
+			//sendMessageWithParm(1, jointRatio);
+			const int kMaxSizeOfMessage = 5;
+			ubyte nTransmitBuffer[kMaxSizeOfMessage] = 1;
+
+			TFileIOResult messageOut = cCmdMessageWriteToBluetooth(2, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+			while(true) {
+				nxtDisplayTextLine(0, "SENT MESSAGE", message);
+			}
+			return;
+	}
+	if (strcmp(command, ARM_EXIT) == 0) {
+		sendMessage(-1);
+		return;
+	}
+	while(true) {
+		nxtDisplayTextLine(0, "PASSED CASES", message);
 	}
 };
 // Pauses the program while we wait for a
 // message from the arm controller.
 void waitForMessage() {
-	waitUntil(message != 0);
+	waitUntil(SensorValue[touchSensor] > 0.7);
+	nextBodyCycle();
 };
 
 // Parses a BODY command coming from the
@@ -109,6 +116,7 @@ void parseMessage() {
 // Initialize system variables
 void init() {
 	stopWheels();
+	setBluetoothOn();
 	SensorType[sonarSensor] = sensorSONAR;
 };
 // Moves forward until we hit sushi
@@ -122,7 +130,6 @@ void toNextSushi(){
 		if (time1[T1] >= SEARCH_TIME) exit();
 	}
 	wait1Msec(seeBufferTime);
-	updateJointRatio();
 
 	stopWheels();
 };
@@ -146,15 +153,15 @@ void exit(){
 // 4) Decide next step depending on message
 void nextBodyCycle(){
 	toNextSushi();
+	updateJointRatio();
 
 	messageArm(ARM_START);
 	waitForMessage();
-
-	parseMessage();
 };
 
 task main()
 {
 	init();
 	nextBodyCycle();
+	waitForMessage();
 }
