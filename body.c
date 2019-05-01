@@ -15,7 +15,7 @@ const string ARM_EXIT = "ARM_EXIT";
 // Movement Variables
 const int SEARCH_TIME = 5000; // Stop searching for sushi after this much time
 const int speed = -10;	// Make negative since it will otherwise go backwards
-const int seeBufferTime = 2000 // Buffer time after seeing object to center itself
+const int seeBufferTime = 0 // Buffer time after seeing object to center itself
 
 // Sushi Sensor Threshold
 const int sushiValue = 10;
@@ -53,7 +53,7 @@ void stopWheels() {
 // Returns true if the light sensor detects
 // sushi, and false otherwise.
 bool seeSushi() {
-	return abs(SensorValue[sonarSensor] - sushiValue) <= errorMargin;
+	return SensorValue[sonarSensor] <= sushiValue;
 };
 
 void updateJointRatio() {
@@ -79,12 +79,10 @@ void messageArm(const string command) {
 	if (strcmp(command, ARM_START) == 0) {
 			//sendMessageWithParm(1, jointRatio);
 			const int kMaxSizeOfMessage = 5;
-			ubyte nTransmitBuffer[kMaxSizeOfMessage] = 1;
+			ubyte nTransmitBuffer[kMaxSizeOfMessage];
+			nTransmitBuffer[0] = 1;
 
 			TFileIOResult messageOut = cCmdMessageWriteToBluetooth(2, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
-			while(true) {
-				nxtDisplayTextLine(0, "SENT MESSAGE", message);
-			}
 			return;
 	}
 	if (strcmp(command, ARM_EXIT) == 0) {
@@ -98,8 +96,33 @@ void messageArm(const string command) {
 // Pauses the program while we wait for a
 // message from the arm controller.
 void waitForMessage() {
-	waitUntil(SensorValue[touchSensor] > 0.7);
-	nextBodyCycle();
+	while(cCmdMessageGetSize(mailbox1) <= 0) {
+		nxtDisplayTextLine(0, "NO MESSAGE", message);
+		wait1Msec(100);
+	}
+
+	const int kMaxSizeOfMessage = 5;
+	ubyte nReceiveBuffer[kMaxSizeOfMessage];
+
+	TFileIOResult messageIn = cCmdMessageRead(nReceiveBuffer, kMaxSizeOfMessage, mailbox1);
+
+	if (nReceiveBuffer[0] == 4) {
+		//sendMessageWithParm(1, jointRatio);
+			const int kMaxSizeOfMessage = 5;
+			ubyte nTransmitBuffer[kMaxSizeOfMessage];
+			nTransmitBuffer[0] = 1;
+			if (seeSushi() == true) {
+					nTransmitBuffer[0] = 0;
+			}
+
+			ClearMessage();
+			TFileIOResult messageOut = cCmdMessageWriteToBluetooth(2, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+			waitForMessage();
+	}
+	if (nReceiveBuffer[0] == 3) {
+		ClearMessage();
+		nextBodyCycle();
+	}
 };
 
 // Parses a BODY command coming from the
@@ -137,8 +160,6 @@ void toNextSushi(){
 // Send message code of -1 to arm to notify it to exit
 void exit(){
 	messageArm(ARM_EXIT);
-	// Wait 1 second to make sure arm receives message.
-	wait1Msec(1000);
 	powerOff();
 };
 

@@ -17,7 +17,7 @@ int turnPower = 50;
 int turnTime = 2500;
 int jointRatio = 1; // Account for difference in distances to robot
 int jointPower = -30;
-int jointTime = 1200;
+int jointTime = 1100;
 int pinchPower = 20;
 int pinchTime = 250;
 
@@ -53,10 +53,6 @@ void toSushiPosition(){
 	motor[jointMotor] = 0;
 };
 void toDropPosition(){
-	// Joint back up
-	motor[jointMotor] = -jointPower;
-	wait1Msec(jointTime * jointRatio);
-	motor[jointMotor] = 0;
 
 	// Turn back
 	turnArm(-turnPower, turnTime);
@@ -93,7 +89,13 @@ void messageBody(const string command) {
 	// RobotC bugs out if switch has one case,
   // just use if check for now.
 	if (strcmp(command, BODY_START) == 0) {
-		sendMessage(3);
+		//sendMessageWithParm(1, jointRatio);
+			const int kMaxSizeOfMessage = 5;
+			ubyte nTransmitBuffer[kMaxSizeOfMessage];
+			nTransmitBuffer[0] = 3;
+
+			TFileIOResult messageOut = cCmdMessageWriteToBluetooth(nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+			return;
 	}
 };
 // Pauses the program while we wait for a
@@ -103,20 +105,17 @@ void waitForMessage(){
 		nxtDisplayTextLine(0, "NO MESSAGE", message);
 		wait1Msec(100);
 	}
-	//waitUntil(SensorValue[touchSensor] > 0.7);
-	//nextArmCycle();
 };
 
 // Parses an ARM command coming from the
 // body controller
 void parseMessage() {
-	switch(message){
-		case 2:
-			ClearMessage();
-			toDefaultPosition();
-			break;
+	const int kMaxSizeOfMessage = 5;
+	ubyte nReceiveBuffer[kMaxSizeOfMessage];
+
+	TFileIOResult messageIn = cCmdMessageRead(nReceiveBuffer, kMaxSizeOfMessage, mailbox1);
+	switch(nReceiveBuffer[0]){
 		case 1:
-			jointRatio = messageParm[1];
 			ClearMessage();
 			nextArmCycle();
 			break;
@@ -156,6 +155,32 @@ void dropSushi() {
 
 	toDefaultPosition();
 };
+void checkIfPickedUp(){
+			const int kMaxSizeOfMessage = 5;
+			ubyte nTransmitBuffer[kMaxSizeOfMessage];
+			nTransmitBuffer[0] = 4;
+
+			TFileIOResult messageOut = cCmdMessageWriteToBluetooth(nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+
+			while(cCmdMessageGetSize(mailbox1) <= 0) {
+				nxtDisplayTextLine(0, "CHECKING", message);
+				wait1Msec(100);
+			}
+
+			ubyte nReceiveBuffer[kMaxSizeOfMessage];
+
+			TFileIOResult messageIn = cCmdMessageRead(nReceiveBuffer, kMaxSizeOfMessage, mailbox1);
+
+			const int successCode = nReceiveBuffer[0];
+
+			if(successCode == 0) {
+				// Release pinch
+				releaseChopsticks();
+				nextArmCycle();
+			}
+
+			return;
+}
 // Exit the program
 void exit(){
 	powerOff();
@@ -174,11 +199,17 @@ void exit(){
 // 6) Repeat loop
 void nextArmCycle() {
 	pickUpSushi();
+	// Joint back up
+	motor[jointMotor] = -jointPower;
+	wait1Msec(jointTime * jointRatio);
+	motor[jointMotor] = 0;
+	checkIfPickedUp();
 	dropSushi();
 
 	messageBody(BODY_START);
 
 	waitForMessage();
+	parseMessage();
 };
 
 task main()
