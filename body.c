@@ -13,12 +13,14 @@ const string ARM_START = "ARM_START";
 const string ARM_EXIT = "ARM_EXIT";
 
 // Movement Variables
-const int SEARCH_TIME = 5000; // Stop searching for sushi after this much time
+const int SEARCH_TIME = 3000; // Stop searching for sushi after this much time
 const int speed = -10;	// Make negative since it will otherwise go backwards
-const int seeBufferTime = 0 // Buffer time after seeing object to center itself
+const int seeBufferTime = 200 // Buffer time after seeing object to center itself
+int distanceFromPlate = 0; // Track distance travelled forward from plate with time
+const int PAUSE_TIME = 700;	// Pause time between steps of algorithm
 
 // Sushi Sensor Threshold
-const int sushiValue = 10;
+const int sushiValue = 17;
 const int errorMargin = 5;
 int jointRatio = 1;
 
@@ -86,8 +88,13 @@ void messageArm(const string command) {
 			return;
 	}
 	if (strcmp(command, ARM_EXIT) == 0) {
-		sendMessage(-1);
-		return;
+		//sendMessageWithParm(1, jointRatio);
+			const int kMaxSizeOfMessage = 5;
+			ubyte nTransmitBuffer[kMaxSizeOfMessage];
+			nTransmitBuffer[0] = -1;
+
+			TFileIOResult messageOut = cCmdMessageWriteToBluetooth(2, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+			return;
 	}
 	while(true) {
 		nxtDisplayTextLine(0, "PASSED CASES", message);
@@ -111,8 +118,11 @@ void waitForMessage() {
 			const int kMaxSizeOfMessage = 5;
 			ubyte nTransmitBuffer[kMaxSizeOfMessage];
 			nTransmitBuffer[0] = 1;
+			wait1Msec(PAUSE_TIME);
 			if (seeSushi() == true) {
 					nTransmitBuffer[0] = 0;
+			} else {
+				  nTransmitBuffer[0] = 1;
 			}
 
 			ClearMessage();
@@ -153,15 +163,21 @@ void toNextSushi(){
 		if (time1[T1] >= SEARCH_TIME) exit();
 	}
 	wait1Msec(seeBufferTime);
+	distanceFromPlate = time1[T1];
 
 	stopWheels();
 };
 // Exit the program
 // Send message code of -1 to arm to notify it to exit
 void exit(){
-	messageArm(ARM_EXIT);
 	powerOff();
 };
+
+void moveBackToPlate(){
+	moveWheels(-speed);
+	wait1Msec(distanceFromPlate);
+	stopWheels();
+}
 
 //--------------------------------------------------Main
 // Runs a single cycle of the sushi program.

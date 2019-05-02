@@ -17,9 +17,11 @@ int turnPower = 50;
 int turnTime = 2500;
 int jointRatio = 1; // Account for difference in distances to robot
 int jointPower = -30;
-int jointTime = 1100;
-int pinchPower = 20;
+int jointTime = 600;
+int pinchPower = 18;
 int pinchTime = 250;
+int pinchBackTime = 250;
+const int PAUSE_TIME = 700;	// Pause time between steps of algorithm
 
 // RobotC doesn't hoist functions, solve
 // this by declaring functions above.
@@ -71,7 +73,7 @@ void pinchChopsticks(){
 // Releases chopsticks from pinching position.
 void releaseChopsticks(){
 	motor[pinchMotor] = -pinchPower;
-	wait1Msec(pinchTime);
+	wait1Msec(pinchBackTime);
 	motor[pinchMotor] = 0;
 };
 
@@ -124,6 +126,7 @@ void parseMessage() {
 			exit();
 			break;
 		default:
+			ClearMessage();
 			nextArmCycle();
 	}
 }
@@ -135,6 +138,7 @@ void init();
 // Pick up the sushi.
 void pickUpSushi() {
 	toSushiPosition();
+	wait1Msec(PAUSE_TIME);
 	pinchChopsticks();
 };
 // Drops the sushi.
@@ -143,14 +147,14 @@ void dropSushi() {
 
 	// Move arm down
 	motor[jointMotor] = jointPower;
-	wait1Msec(600);
+	wait1Msec(200);
 	motor[jointMotor] = 0;
 
 	releaseChopsticks();
 
 	// Move arm up
 	motor[jointMotor] = -jointPower;
-	wait1Msec(650);
+	wait1Msec(300);
 	motor[jointMotor] = 0;
 
 	toDefaultPosition();
@@ -160,7 +164,10 @@ void checkIfPickedUp(){
 			ubyte nTransmitBuffer[kMaxSizeOfMessage];
 			nTransmitBuffer[0] = 4;
 
-			TFileIOResult messageOut = cCmdMessageWriteToBluetooth(nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+			TFileIOResult messageOut = cCmdMessageWriteToBluetooth(0, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+			messageOut = cCmdMessageWriteToBluetooth(1, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+			messageOut = cCmdMessageWriteToBluetooth(2, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+			messageOut = cCmdMessageWriteToBluetooth(3, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
 
 			while(cCmdMessageGetSize(mailbox1) <= 0) {
 				nxtDisplayTextLine(0, "CHECKING", message);
@@ -172,14 +179,16 @@ void checkIfPickedUp(){
 			TFileIOResult messageIn = cCmdMessageRead(nReceiveBuffer, kMaxSizeOfMessage, mailbox1);
 
 			const int successCode = nReceiveBuffer[0];
-
+			ClearMessage();
 			if(successCode == 0) {
 				// Release pinch
 				releaseChopsticks();
 				nextArmCycle();
 			}
+			if(successCode == 1) {
+				return;
+			}
 
-			return;
 }
 // Exit the program
 void exit(){
@@ -216,6 +225,5 @@ task main()
 {
 	setBluetoothOn();
 	waitForMessage();
-	//waitForMessage();
 	parseMessage();
 }
