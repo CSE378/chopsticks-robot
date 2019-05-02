@@ -13,7 +13,7 @@ const string ARM_START = "ARM_START";
 const string ARM_EXIT = "ARM_EXIT";
 
 // Movement Variables
-const int SEARCH_TIME = 3000; // Stop searching for sushi after this much time
+const int SEARCH_TIME = 30000; // Stop searching for sushi after this much time
 const int speed = -10;	// Make negative since it will otherwise go backwards
 const int seeBufferTime = 200 // Buffer time after seeing object to center itself
 int distanceFromPlate = 0; // Track distance travelled forward from plate with time
@@ -49,6 +49,12 @@ void stopWheels() {
 	motor[leftWheel] = 0;
 	motor[rightWheel] = 0;
 };
+
+void moveBackToPlate(){
+	moveWheels(-speed);
+	wait1Msec(distanceFromPlate);
+	stopWheels();
+}
 
 //--------------------------------------------------Vision
 
@@ -128,11 +134,22 @@ void waitForMessage() {
 			ClearMessage();
 			TFileIOResult messageOut = cCmdMessageWriteToBluetooth(2, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
 			waitForMessage();
+			return;
 	}
 	if (nReceiveBuffer[0] == 3) {
 		ClearMessage();
 		nextBodyCycle();
+		return;
 	}
+		moveBackToPlate();
+
+		ubyte nTransmitBuffer[kMaxSizeOfMessage];
+		nTransmitBuffer[0] = 11;
+		wait1Msec(PAUSE_TIME);
+
+		ClearMessage();
+		TFileIOResult messageOut = cCmdMessageWriteToBluetooth(2, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+		waitForMessage();
 };
 
 // Parses a BODY command coming from the
@@ -172,12 +189,6 @@ void toNextSushi(){
 void exit(){
 	powerOff();
 };
-
-void moveBackToPlate(){
-	moveWheels(-speed);
-	wait1Msec(distanceFromPlate);
-	stopWheels();
-}
 
 //--------------------------------------------------Main
 // Runs a single cycle of the sushi program.

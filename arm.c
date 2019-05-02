@@ -188,8 +188,33 @@ void checkIfPickedUp(){
 			if(successCode == 1) {
 				return;
 			}
-
 }
+
+void goBackToPlate(){
+			const int kMaxSizeOfMessage = 5;
+			ubyte nTransmitBuffer[kMaxSizeOfMessage];
+			nTransmitBuffer[0] = 2; // Back to Plate
+
+			TFileIOResult messageOut = cCmdMessageWriteToBluetooth(0, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+			messageOut = cCmdMessageWriteToBluetooth(1, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+			messageOut = cCmdMessageWriteToBluetooth(2, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+			messageOut = cCmdMessageWriteToBluetooth(3, nTransmitBuffer, kMaxSizeOfMessage, mailbox1);
+
+			while(cCmdMessageGetSize(mailbox1) <= 0) {
+				nxtDisplayTextLine(0, "CHECKING", message);
+				wait1Msec(100);
+			}
+
+			ubyte nReceiveBuffer[kMaxSizeOfMessage];
+
+			TFileIOResult messageIn = cCmdMessageRead(nReceiveBuffer, kMaxSizeOfMessage, mailbox1);
+
+			const int successCode = nReceiveBuffer[0];
+			if (successCode == 11) {
+				ClearMessage();
+				return;
+			}
+};
 // Exit the program
 void exit(){
 	powerOff();
@@ -213,6 +238,7 @@ void nextArmCycle() {
 	wait1Msec(jointTime * jointRatio);
 	motor[jointMotor] = 0;
 	checkIfPickedUp();
+	goBackToPlate();
 	dropSushi();
 
 	messageBody(BODY_START);
