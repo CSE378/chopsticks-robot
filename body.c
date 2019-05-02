@@ -51,8 +51,8 @@ void stopWheels() {
 };
 
 void moveBackToPlate(){
-	moveWheels(-speed);
-	wait1Msec(distanceFromPlate);
+	moveWheels(-speed * 2);
+	wait1Msec(distanceFromPlate / 2);
 	stopWheels();
 }
 
@@ -167,6 +167,7 @@ void parseMessage() {
 void init() {
 	stopWheels();
 	setBluetoothOn();
+	clearBluetooth();
 	SensorType[sonarSensor] = sensorSONAR;
 };
 // Moves forward until we hit sushi
@@ -189,6 +190,18 @@ void toNextSushi(){
 void exit(){
 	powerOff();
 };
+
+
+void clearBluetooth() {
+	ClearMessage();
+	ClearMessage();
+	ClearMessage();
+	ClearMessage();
+	ClearMessage();
+	ClearMessage();
+	ClearMessage();
+	ClearMessage();
+}
 
 //--------------------------------------------------Main
 // Runs a single cycle of the sushi program.

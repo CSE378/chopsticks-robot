@@ -220,6 +220,16 @@ void exit(){
 	powerOff();
 };
 
+void clearBluetooth() {
+	ClearMessage();
+	ClearMessage();
+	ClearMessage();
+	ClearMessage();
+	ClearMessage();
+	ClearMessage();
+	ClearMessage();
+	ClearMessage();
+}
 
 //--------------------------------------------------Main
 // Runs a single cycle of the arm program.
@@ -249,7 +259,9 @@ void nextArmCycle() {
 
 task main()
 {
+
 	setBluetoothOn();
+	clearBluetooth();
 	waitForMessage();
 	parseMessage();
 }
